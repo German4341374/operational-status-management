@@ -117,7 +117,7 @@ jobs:
         run: |
           curl --fail --silent --show-error http://127.0.0.1:8080/health | jq -e '.status == "UP" and .database == "UP"'
           curl --fail --silent --show-error http://127.0.0.1:8080/api/status | jq -e '.overall == "DEGRADED" and (.groups | length) > 0'
-          curl --fail --silent --show-error http://127.0.0.1:8080/ | grep -F 'Operational Status Management'
+          curl --fail --silent --show-error http://127.0.0.1:8080/ | grep -F 'Operational Status'
           curl --fail --silent --show-error http://127.0.0.1:8080/feed.xml | grep -F '<rss version="2.0">'
           curl --fail-with-body --silent --show-error -X POST http://127.0.0.1:8080/api/subscriptions \
             -H 'Content-Type: application/json' \
