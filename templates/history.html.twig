@@ -1,0 +1,12 @@
+{% extends 'layout.html.twig' %}
+{% block title %}Status history · Operational Status{% endblock %}
+{% block content %}
+<section class="hero compact"><p class="eyebrow">Timeline</p><h1>Status history</h1><p>Recent public incidents and immutable operational updates.</p></section>
+<section class="panel">
+  {% for incident in incidents %}
+  <article class="history-item"><div><span class="badge severity-{{ incident.severity|lower }}">{{ incident.severity }}</span><h2>{{ incident.title }}</h2></div><p>{{ incident.description }}</p><p class="meta">Started {{ incident.started_at|date('M j, Y H:i T') }} · {{ incident.status|replace({'_':' '})|title }}</p>
+    <ol class="updates">{% for update in incident.updates %}<li><time>{{ update.created_at|date('M j H:i T') }}</time><strong>{{ update.status|title }}</strong><p>{{ update.message }}</p></li>{% endfor %}</ol>
+  </article>
+  {% else %}<p class="empty">No incident history yet.</p>{% endfor %}
+</section>
+{% endblock %}

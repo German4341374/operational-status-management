@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Operational Status{% endblock %}</title>
+  <link rel="stylesheet" href="/assets/app.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span>OS</span> Operational Status</a>
+  <nav><a href="/">Current status</a><a href="/history">History</a><a href="/feed.xml">RSS</a><a href="/admin">Admin</a></nav>
+</header>
+<main class="container">{% block content %}{% endblock %}</main>
+<footer><div class="container">Status data is generated locally. No analytics or notification delivery is enabled.</div></footer>
+</body>
+</html>

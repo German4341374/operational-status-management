@@ -1,0 +1,13 @@
+{% extends 'layout.html.twig' %}
+{% block title %}Admin sign in · Operational Status{% endblock %}
+{% block content %}
+<section class="auth-card panel"><p class="eyebrow">Restricted area</p><h1>Administrator sign in</h1><p>Credentials are supplied through environment variables and never stored in the database.</p>
+  {% if error|default(null) %}<div class="alert error">{{ error }}</div>{% endif %}
+  <form method="post" action="/admin/login" class="stack">
+    <input type="hidden" name="_csrf" value="{{ csrf_token('login') }}">
+    <label>Username<input name="username" required autocomplete="username"></label>
+    <label>Password<input type="password" name="password" required autocomplete="current-password"></label>
+    <button type="submit">Sign in</button>
+  </form>
+</section>
+{% endblock %}

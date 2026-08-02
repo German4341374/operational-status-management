@@ -1,0 +1,58 @@
+{
+  "name": "german4341374/operational-status-management",
+  "description": "Status management for public and internal services.",
+  "type": "project",
+  "license": "MIT",
+  "require": {
+    "php": "^8.5",
+    "ext-ctype": "*",
+    "ext-json": "*",
+    "ext-mbstring": "*",
+    "ext-openssl": "*",
+    "ext-pdo": "*",
+    "ext-pdo_pgsql": "*",
+    "monolog/monolog": "^3.10",
+    "symfony/cache": "^8.0",
+    "symfony/dotenv": "^8.0",
+    "symfony/http-foundation": "^8.0",
+    "symfony/password-hasher": "^8.0",
+    "symfony/rate-limiter": "^8.0",
+    "symfony/routing": "^8.0",
+    "symfony/security-csrf": "^8.0",
+    "twig/twig": "^3.21"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.90",
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^13.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "OperationalStatus\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "OperationalStatus\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "lint": "php-cs-fixer check --diff --verbose",
+    "format": "php-cs-fixer fix",
+    "analyse": "phpstan analyse --no-progress --debug --memory-limit=512M",
+    "test": "phpunit",
+    "check": [
+      "@lint",
+      "@analyse",
+      "composer audit --locked --no-interaction",
+      "@test"
+    ]
+  },
+  "config": {
+    "allow-plugins": {},
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}

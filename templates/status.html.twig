@@ -1,0 +1,47 @@
+{% extends 'layout.html.twig' %}
+{% block title %}Service status · Operational Status{% endblock %}
+{% block content %}
+<section class="hero">
+  <p class="eyebrow">Live service health</p>
+  <div class="overall status-{{ overall.value|lower }}">
+    <div><h1>{{ overall.label }}</h1><p>Current aggregate condition across public components.</p></div>
+    <span class="pulse"></span>
+  </div>
+  <p class="generated">Last generated {{ generatedAt|date('M j, Y H:i T') }}</p>
+</section>
+
+{% for group in groups %}
+<section class="panel component-group">
+  <div class="section-heading"><div><p class="eyebrow">Component group</p><h2>{{ group.name }}</h2></div><p>{{ group.description }}</p></div>
+  <div class="component-list">
+    {% for component in group.components %}
+    <article class="component">
+      <div><strong>{{ component.name }}</strong><small>{{ component.description }}</small></div>
+      <div class="component-metrics"><span>{{ component.uptime|number_format(3) }}% 90d uptime</span><span class="badge status-{{ component.status|lower }}">{{ component.status|replace({'_': ' '})|title }}</span></div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}
+
+<section class="grid two">
+  <div class="panel">
+    <p class="eyebrow">Active incidents</p><h2>What we are working on</h2>
+    {% for incident in incidents %}
+    <article class="incident severity-{{ incident.severity|lower }}">
+      <div class="incident-title"><h3>{{ incident.title }}</h3><span class="badge">{{ incident.status|replace({'_':' '})|title }}</span></div>
+      <p>{{ incident.description }}</p>
+      <p class="meta">Affected: {% for component in incident.components %}{{ component.name }}{% if not loop.last %}, {% endif %}{% endfor %}</p>
+      <ol class="updates">{% for update in incident.updates %}<li><time>{{ update.created_at|date('M j H:i T') }}</time><strong>{{ update.status|title }}</strong><p>{{ update.message }}</p></li>{% endfor %}</ol>
+    </article>
+    {% else %}<p class="empty">No active incidents.</p>{% endfor %}
+  </div>
+  <div class="panel">
+    <p class="eyebrow">Planned work</p><h2>Scheduled maintenance</h2>
+    {% for window in maintenance %}
+    <article class="maintenance"><h3>{{ window.title }}</h3><p>{{ window.description }}</p><p class="meta">{{ window.starts_at|date('M j H:i T') }}–{{ window.ends_at|date('M j H:i T') }}</p></article>
+    {% else %}<p class="empty">No scheduled maintenance.</p>{% endfor %}
+    <div class="subscription"><h3>Record a subscription</h3><p>This demo records a privacy-preserving hash and intentionally sends no email.</p><form id="subscribe" method="post" action="/api/subscriptions"><label>Email<input type="email" name="email" required autocomplete="email"></label><button type="submit">Subscribe</button></form></div>
+  </div>
+</section>
+{% endblock %}

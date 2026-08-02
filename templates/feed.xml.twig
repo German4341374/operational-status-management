@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Operational Status incidents</title>
+    <link>{{ app_url }}/history</link>
+    <description>Recent public service incidents and updates.</description>
+    {% for incident in incidents %}
+    <item>
+      <guid isPermaLink="false">{{ incident.id }}</guid>
+      <title>{{ incident.title }}</title>
+      <description>{{ incident.description }}</description>
+      <pubDate>{{ incident.started_at|date('r') }}</pubDate>
+      <link>{{ app_url }}/history</link>
+    </item>
+    {% endfor %}
+  </channel>
+</rss>
