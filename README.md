@@ -190,7 +190,7 @@ docker compose config
 docker compose build
 ```
 
-GitHub Actions executes the complete sequence against PostgreSQL, uploads JUnit results, and builds both images without publishing them.
+GitHub Actions executes the complete sequence against PostgreSQL, uploads JUnit results, builds both images without publishing them, starts the complete Compose stack, waits for health checks, and exercises the public page, API, RSS feed, and subscription endpoint.
 
 ## Caching strategy
 

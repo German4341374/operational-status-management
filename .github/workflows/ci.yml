@@ -78,10 +78,14 @@ jobs:
           retention-days: 14
 
   container:
-    name: Build PHP-FPM and Nginx images
+    name: Build images and smoke-test Compose
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     needs: test
+    env:
+      APP_SECRET: compose-smoke-secret-at-least-32-characters
+      POSTGRES_PASSWORD: compose-smoke-database-password
+      ADMIN_PASSWORD_HASH: $2y$12$0vDDDQyLFmcMsvcATP3dcen2eFB1DhPORvlg/p7Nv7jhmhslm8cJy
     steps:
       - name: Check out source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -93,7 +97,8 @@ jobs:
           context: .
           file: Dockerfile
           push: false
-          tags: operational-status-management-app:ci
+          load: true
+          tags: operational-status-management-app:local
           cache-from: type=gha,scope=php
           cache-to: type=gha,mode=max,scope=php
       - name: Build Nginx image without publishing
@@ -102,6 +107,26 @@ jobs:
           context: .
           file: Dockerfile.nginx
           push: false
-          tags: operational-status-management-nginx:ci
+          load: true
+          tags: operational-status-management-nginx:local
           cache-from: type=gha,scope=nginx
           cache-to: type=gha,mode=max,scope=nginx
+      - name: Start the complete Compose environment
+        run: docker compose up --detach --wait --no-build
+      - name: Exercise public HTTP surfaces
+        run: |
+          curl --fail --silent --show-error http://127.0.0.1:8080/health | jq -e '.status == "UP" and .database == "UP"'
+          curl --fail --silent --show-error http://127.0.0.1:8080/api/status | jq -e '.overall == "DEGRADED" and (.groups | length) > 0'
+          curl --fail --silent --show-error http://127.0.0.1:8080/ | grep -F 'Operational Status Management'
+          curl --fail --silent --show-error http://127.0.0.1:8080/feed.xml | grep -F '<rss version="2.0">'
+          curl --fail-with-body --silent --show-error -X POST http://127.0.0.1:8080/api/subscriptions \
+            -H 'Content-Type: application/json' \
+            -d '{"email":"compose.smoke@example.invalid","scope":"all"}' | jq -e '.delivery == "disabled"'
+      - name: Show Compose diagnostics on failure
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs --no-color
+      - name: Stop the Compose environment
+        if: always()
+        run: docker compose down --volumes --remove-orphans

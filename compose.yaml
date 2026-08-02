@@ -20,6 +20,7 @@ services:
     networks: [data]
 
   application:
+    image: operational-status-management-app:local
     build:
       context: .
       target: runtime
@@ -48,6 +49,7 @@ services:
     networks: [edge, data]
 
   nginx:
+    image: operational-status-management-nginx:local
     build:
       context: .
       dockerfile: Dockerfile.nginx
