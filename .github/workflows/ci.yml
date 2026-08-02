@@ -1,0 +1,107 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Static analysis, tests, and PostgreSQL smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:18.4-alpine3.24
+        env:
+          POSTGRES_DB: operational_status_test
+          POSTGRES_USER: status_test
+          POSTGRES_PASSWORD: integration-test-only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U status_test -d operational_status_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+    env:
+      APP_ENV: test
+      APP_DEBUG: "false"
+      APP_SECRET: integration-test-secret-at-least-32-characters
+      SESSION_SECURE: "false"
+      DATABASE_URL: pgsql:host=127.0.0.1;port=5432;dbname=operational_status_test
+      DATABASE_USER: status_test
+      DATABASE_PASSWORD: integration-test-only
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD_HASH: $2y$12$0vDDDQyLFmcMsvcATP3dcen2eFB1DhPORvlg/p7Nv7jhmhslm8cJy
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Set up PHP 8.5
+        uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f # 2.35.5
+        with:
+          php-version: "8.5"
+          extensions: ctype, json, mbstring, openssl, pdo, pdo_pgsql
+          coverage: none
+      - name: Validate dependency manifest
+        run: composer validate --strict
+      - name: Install locked dependencies
+        run: composer install --no-interaction --no-progress --prefer-dist
+      - name: Check formatting
+        run: composer lint
+      - name: Run PHPStan
+        run: composer analyse
+      - name: Audit locked dependencies
+        run: composer audit --locked --no-interaction
+      - name: Apply migrations twice to prove idempotency
+        run: |
+          php bin/migrate.php
+          php bin/migrate.php
+      - name: Verify database constraints and immutable updates
+        run: php bin/database-smoke.php
+      - name: Run unit tests
+        run: vendor/bin/phpunit --log-junit build/junit.xml
+      - name: Upload JUnit report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: phpunit-report
+          path: build/junit.xml
+          if-no-files-found: warn
+          retention-days: 14
+
+  container:
+    name: Build PHP-FPM and Nginx images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    needs: test
+    steps:
+      - name: Check out source
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+      - name: Build PHP-FPM image without publishing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: Dockerfile
+          push: false
+          tags: operational-status-management-app:ci
+          cache-from: type=gha,scope=php
+          cache-to: type=gha,mode=max,scope=php
+      - name: Build Nginx image without publishing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: .
+          file: Dockerfile.nginx
+          push: false
+          tags: operational-status-management-nginx:ci
+          cache-from: type=gha,scope=nginx
+          cache-to: type=gha,mode=max,scope=nginx

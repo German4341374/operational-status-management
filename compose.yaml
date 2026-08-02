@@ -1,0 +1,75 @@
+name: operational-status-management
+
+services:
+  database:
+    image: postgres:18.4-alpine3.24
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-operational_status}
+      POSTGRES_USER: ${POSTGRES_USER:-status_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env and set POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+    security_opt: ["no-new-privileges:true"]
+    networks: [data]
+
+  application:
+    build:
+      context: .
+      target: runtime
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: "false"
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      APP_SECRET: ${APP_SECRET:?Copy .env.example to .env and set APP_SECRET}
+      SESSION_SECURE: ${SESSION_SECURE:-false}
+      DATABASE_URL: pgsql:host=database;port=5432;dbname=${POSTGRES_DB:-operational_status}
+      DATABASE_USER: ${POSTGRES_USER:-status_app}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:?Copy .env.example to .env and set POSTGRES_PASSWORD}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD_HASH: ${ADMIN_PASSWORD_HASH:?Set an admin password hash in .env}
+      PUBLIC_CACHE_TTL: ${PUBLIC_CACHE_TTL:-30}
+    depends_on:
+      database:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+      - /var/www/html/var:size=96m,uid=82,gid=82,mode=0700
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+    networks: [edge, data]
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on:
+      application:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp:size=32m,uid=101,gid=101,mode=0700
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+    networks: [edge]
+
+volumes:
+  postgres_data:
+
+networks:
+  edge:
+    driver: bridge
+  data:
+    driver: bridge
+    internal: true

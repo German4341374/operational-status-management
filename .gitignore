@@ -1,0 +1,14 @@
+/.env
+/.php-cs-fixer.cache
+/.phpunit.cache
+/.phpstan-cache
+/.tools
+/build
+/var/cache
+/var/log
+/var/sessions
+/vendor
+*.log
+.idea/
+.vscode/
+Thumbs.db

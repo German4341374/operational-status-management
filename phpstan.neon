@@ -1,0 +1,10 @@
+parameters:
+  level: 8
+  paths:
+    - src
+    - public
+    - bin
+  tmpDir: .phpstan-cache
+  treatPhpDocTypesAsCertain: false
+  parallel:
+    maximumNumberOfProcesses: 1

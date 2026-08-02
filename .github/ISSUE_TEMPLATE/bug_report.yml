@@ -1,0 +1,24 @@
+name: Bug report
+description: Report a reproducible status-management defect
+title: "bug: "
+labels: [bug]
+body:
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Observed and expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Include sanitized logs and no subscriber addresses or credentials.
+    validations:
+      required: true
+  - type: input
+    id: revision
+    attributes:
+      label: Version or commit
+    validations:
+      required: true

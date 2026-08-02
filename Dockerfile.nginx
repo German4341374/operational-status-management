@@ -1,0 +1,7 @@
+# syntax=docker/dockerfile:1.12
+FROM nginx:1.29.8-alpine3.23
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY public/assets /var/www/html/public/assets
+USER nginx
+EXPOSE 8080
+HEALTHCHECK --interval=15s --timeout=3s --start-period=20s --retries=5 CMD wget -qO- http://127.0.0.1:8080/health || exit 1
