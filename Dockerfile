@@ -8,7 +8,7 @@ RUN composer install --no-dev --no-interaction --no-progress --prefer-dist --cla
 FROM php:8.5.9-fpm-alpine3.23 AS runtime
 RUN apk add --no-cache libpq \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS postgresql-dev \
-    && docker-php-ext-install -j"$(nproc)" pdo_pgsql opcache \
+    && docker-php-ext-install -j"$(nproc)" pdo_pgsql \
     && apk del .build-deps \
     && mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
