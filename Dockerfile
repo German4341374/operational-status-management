@@ -2,6 +2,7 @@
 FROM composer:2.10.2 AS dependencies
 WORKDIR /app
 COPY composer.json composer.lock ./
+COPY src ./src
 RUN composer install --no-dev --no-interaction --no-progress --prefer-dist --classmap-authoritative \
     --ignore-platform-req=ext-pdo_pgsql
 
