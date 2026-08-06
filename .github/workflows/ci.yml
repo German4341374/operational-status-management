@@ -34,7 +34,7 @@ jobs:
     env:
       APP_ENV: test
       APP_DEBUG: "false"
-      APP_SECRET: integration-test-secret-at-least-32-characters
+      APP_SECRET: integration-test-secret-at-least-32-characters  # gitleaks:allow -- CI fixture
       SESSION_SECURE: "false"
       DATABASE_URL: pgsql:host=127.0.0.1;port=5432;dbname=operational_status_test
       DATABASE_USER: status_test
@@ -83,7 +83,7 @@ jobs:
     timeout-minutes: 20
     needs: test
     env:
-      APP_SECRET: compose-smoke-secret-at-least-32-characters
+      APP_SECRET: compose-smoke-secret-at-least-32-characters  # gitleaks:allow -- CI fixture
       POSTGRES_PASSWORD: compose-smoke-database-password
       ADMIN_PASSWORD_HASH: $2y$12$0vDDDQyLFmcMsvcATP3dcen2eFB1DhPORvlg/p7Nv7jhmhslm8cJy
     steps:
