@@ -226,7 +226,7 @@ Do not edit a migration already applied to a shared environment. Diagnose the fa
 - Login rate limiting affects every user: configure trusted proxy handling before deployment so the application sees the real client address.
 - Uptime differs from external monitoring: this metric is based on manually recorded component status, not synthetic probes.
 
-## Limitations and future improvements
+## Known limitations
 
 - One environment-defined admin account; no RBAC or identity provider integration
 - Subscriptions are stored as irreversible hashes and no delivery is attempted
