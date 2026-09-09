@@ -3,9 +3,12 @@
 [![CI](https://github.com/German4341374/operational-status-management/actions/workflows/ci.yml/badge.svg)](https://github.com/German4341374/operational-status-management/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Operational Status Management is a compact status-management application for public and internal services. Operators organize components, publish incident timelines and maintenance windows, while customers receive a cached public status page, JSON API, status history, and RSS feed.
+Group your services, post incident updates, and let people know about planned maintenance.
+The public page shows the current state and recent history; the admin area is where you
+make changes. There's also a JSON API and an RSS feed.
 
-The application records subscriptions but deliberately sends no email. Subscriber addresses are normalized and converted to keyed HMAC hashes before persistence, so the original address cannot be recovered from the database.
+Subscriptions are recorded, but no email is sent. The database stores a keyed hash of each
+subscriber address rather than the original address.
 
 ## Features
 
