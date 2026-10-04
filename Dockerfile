@@ -6,7 +6,7 @@ COPY src ./src
 RUN composer install --no-dev --no-interaction --no-progress --prefer-dist --classmap-authoritative \
     --ignore-platform-req=ext-pdo_pgsql
 
-FROM php:8.5.9-fpm-alpine3.23 AS runtime
+FROM php:8.5.11-fpm-alpine3.23 AS runtime
 RUN apk add --no-cache libpq \
     && apk add --no-cache --virtual .build-deps $PHPIZE_DEPS postgresql-dev \
     && docker-php-ext-install -j"$(nproc)" pdo_pgsql \
